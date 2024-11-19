@@ -78,10 +78,5 @@ def generate_sudoku(size=9, rem=10):
     sudoku = SudokuGenerator(size, rem)
     sudoku.fill_values()
     sudoku.remove_cells()
-    sudoku.print_board()
-    '''
-    board = sudoku.get_board()
-    board = sudoku.get_board()
-    return board
-    '''
+    #sudoku.print_board()
 generate_sudoku()
