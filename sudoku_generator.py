@@ -33,7 +33,7 @@ class SudokuGenerator:
         for r in range(rs,re):
             for c in range(cs,ce):
                 while 1:
-                    if self.valid_in_box(rs,cs,n:=random.randint(1,8)): 
+                    if self.valid_in_box(rs,cs,n:=random.randint(1,9)): 
                         self.board[r][c]=n
                         break
         #self.print_board()
@@ -70,7 +70,7 @@ class SudokuGenerator:
         idx=[]
         for _ in range(self.rem):
             while 1:
-                i,j=random.randint(1,8),random.randint(1,8); 
+                i,j=random.randint(0,8),random.randint(0,8); 
                 if (i,j) not in idx: idx.append((i,j));break
         for (i,j) in idx: self.board[i][j]=0 
 
