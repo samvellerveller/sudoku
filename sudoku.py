@@ -6,15 +6,10 @@ from pygame.sprite import Sprite
 # mapping actions to buttons, as property:
 # https://programmingpixels.com/handling-a-title-screen-game-flow-and-buttons-in-pygame.html
 
-# CONSTANTS
-
-
 WIDTH, HEIGHT = (500,500)
 WHITE=(255, 255, 255)
 BLUE=(0, 0, 255)
 BLACK=(0, 0, 0)
-
-
 
 class STATE:
     QUIT=-1
@@ -36,7 +31,8 @@ class Button(Sprite):
 
     def update(self, mousepos, _up):
         self.hover=True if (col:=self.rect.collidepoint(mousepos)) else False
-        if col and _up: return self.action,self.val if self.val is not None else self.action
+        if col and _up: return (self.action,self.val) if self.val is not None else self.action
+
             
     def draw(self, surface):
         pygame.draw.rect(surface, BLUE, self.rect)
@@ -47,9 +43,11 @@ class Button(Sprite):
 def title(screen):
     font=_font(32)
     running=True
-    objects= [Button("Easy",font, .1*WIDTH, .55*HEIGHT,action=STATE.GAME,val=30), 
+    objects= [
+        Button("Easy",font, .1*WIDTH, .55*HEIGHT,action=STATE.GAME,val=30), 
         Button("Med.",font, .4*WIDTH, .55*HEIGHT,action=STATE.GAME,val=40), 
-        Button("Hard",font, .7*WIDTH, .55*HEIGHT,action=STATE.GAME,val=50)]
+        Button("Hard",font, .7*WIDTH, .55*HEIGHT,action=STATE.GAME,val=50)
+        ]
 
     #EVENT HANDLING 
     while running:
@@ -66,7 +64,7 @@ def title(screen):
         #LOGIC UPDATES
         for obj in objects: 
             _state=obj.update(pygame.mouse.get_pos(), mouse_up)
-            if _state is not None: return _state
+            if _state!=None and _state[0]!=STATE.TITLE: return _state
             obj.draw(screen)
         pygame.draw.rect(screen, BLACK, (0, 0, WIDTH,HEIGHT), 1)
 
@@ -75,14 +73,16 @@ def title(screen):
     return STATE.QUIT
 
 def game(screen,dif):
-    board=SudokuGenerator(9, dif).fill_values()
+    board=SudokuGenerator(9, dif)
+    board.fill_values()
     board.remove_cells()
     font=_font(32)
     running=True
+    clock=pygame.time.Clock()
     objects= [
         Button("Reset",font, .1*WIDTH, .55*HEIGHT,action=STATE.GAME), 
         Button("Restart.",font, .4*WIDTH, .55*HEIGHT,action=STATE.GAME),
-        Button("Exit",font, .4*WIDTH, .55*HEIGHT,action=STATE.GAME)
+        Button("Exit",font, .7*WIDTH, .55*HEIGHT,action=STATE.QUIT)
         ]
 
 
@@ -99,11 +99,11 @@ def game(screen,dif):
         #LOGIC UPDATES
         for obj in objects: 
             _state=obj.update(pygame.mouse.get_pos(), mouse_up)
-            if _state is not None: return _state
+            if _state is not None and _state!=STATE.GAME: return _state
             obj.draw(screen)
         pygame.draw.rect(screen, BLACK, (0, 0, WIDTH,HEIGHT), 1)
 
-        #DISPLAY
+
         pygame.display.flip()  
     return STATE.QUIT
 
@@ -113,15 +113,13 @@ def main():
     state=STATE.TITLE
 
     while True:
-        if state==STATE.QUIT:
-            pygame.quit()
-            return
-        if state==STATE.TITLE:
-            state,dif=title(screen)
-        if state==STATE.GAME:
+        if state==STATE.QUIT: pygame.quit();return
+        if state==STATE.TITLE: state,dif=title(screen)
+        if state==STATE.GAME: 
+            clock.tick(60)
             state=game(screen,dif)
+    print(state,dif)
 
-    clock.tick(60)
 
 
 main()
