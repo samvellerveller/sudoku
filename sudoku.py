@@ -3,6 +3,8 @@ from sudoku_generator import SudokuGenerator
 import pygame
 from pygame.sprite import Sprite
 
+from BoardandCell import Cell, Board
+
 # mapping actions to buttons, as property:
 # https://programmingpixels.com/handling-a-title-screen-game-flow-and-buttons-in-pygame.html
 
@@ -76,6 +78,12 @@ def game(screen,dif):
     board=SudokuGenerator(9, dif)
     board.fill_values()
     board.remove_cells()
+
+    cell_size = WIDTH / 9
+    # get list of values for board and intialize game board with cells, gridlines
+    starting_board = board.get_board()
+    game_board = Board(WIDTH, HEIGHT, screen, starting_board)
+
     font=_font(32)
     running=True
     clock=pygame.time.Clock()
@@ -94,7 +102,20 @@ def game(screen,dif):
             if event.type == pygame.QUIT: 
                 running = False; break
             if event.type == pygame.MOUSEBUTTONUP and event.button:
-                mouse_up=True 
+                mouse_up=True
+
+            #click cell
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # get x, y coordinates of the click and pass them in to Board.click() to get the corresponding row, col
+                click_x, click_y = event.pos
+
+                cell_clicked = game_board.click(click_x, click_y)
+                print(cell_clicked)
+
+                if cell_clicked is not None:
+                    # use cell_clicked to select the cell at row, col
+                    row, col = cell_clicked
+                    game_board.select(row, col)
 
         #LOGIC UPDATES
         for obj in objects: 
@@ -102,6 +123,9 @@ def game(screen,dif):
             if _state is not None and _state!=STATE.GAME: return _state
             obj.draw(screen)
         pygame.draw.rect(screen, BLACK, (0, 0, WIDTH,HEIGHT), 1)
+
+        # draw game board after user selects difficulty
+        game_board.draw()
 
 
         pygame.display.flip()  
