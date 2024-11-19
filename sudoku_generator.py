@@ -74,9 +74,3 @@ class SudokuGenerator:
                 if (i,j) not in idx: idx.append((i,j));break
         for (i,j) in idx: self.board[i][j]=0 
 
-def generate_sudoku(size=9, rem=10):
-    sudoku = SudokuGenerator(size, rem)
-    sudoku.fill_values()
-    sudoku.remove_cells()
-    #sudoku.print_board()
-generate_sudoku()
