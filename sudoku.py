@@ -99,6 +99,25 @@ def game(screen,dif):
             if event.type == pygame.MOUSEBUTTONUP and event.button: mouse_up=True
             if event.type == pygame.MOUSEBUTTONDOWN: 
                 game_board.select(*(cell_clicked if (cell_clicked:=game_board.click(event.pos[0], event.pos[1])) in gen_cells else (None,None)))
+
+            #arrow keys
+            if event.type == pygame.KEYDOWN:
+                curr_cell = game_board.selected_cell #row,col of current cell
+
+                if event.key == pygame.K_LEFT:
+                    new_cell = (curr_cell[0] , curr_cell[1] - 1) #go left a column
+                    game_board.select(*(new_cell) if new_cell in gen_cells else (None, None))
+                elif event.key == pygame.K_RIGHT:
+                    new_cell = (curr_cell[0], curr_cell[1] + 1)  # go right a column
+                    game_board.select(*(new_cell) if new_cell in gen_cells else (None, None))
+                elif event.key == pygame.K_UP:
+                    new_cell = (curr_cell[0] - 1, curr_cell[1])  # go up a row
+                    game_board.select(*(new_cell) if new_cell in gen_cells else (None, None))
+                elif event.key == pygame.K_DOWN:
+                    new_cell = (curr_cell[0] + 1, curr_cell[1])  # go down a row
+                    game_board.select(*(new_cell) if new_cell in gen_cells else (None, None))
+
+
             if event.type==pygame.KEYDOWN and event.key in [pygame.key.key_code(str(i)) for i in range(1,10)] and game_board.selected_cell is not None:
                 game_board.sketch(pygame.key.name(event.key))
             elif event.type==pygame.KEYDOWN and event.key == pygame.K_RETURN and game_board.selected_cell is not None:

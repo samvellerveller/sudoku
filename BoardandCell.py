@@ -82,12 +82,12 @@ class Board:
 #                 #use cell_clicked to select the cell at row, col
 #                     row, col = cell_clicked
 #                     board.select(row, col)
-
-
-
-
-
-
+#
+#
+#
+#
+#
+#
 #         screen.fill("white")
 #
 #         board.draw()
