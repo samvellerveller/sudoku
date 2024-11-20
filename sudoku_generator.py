@@ -73,4 +73,5 @@ class SudokuGenerator:
                 i,j=random.randint(0,8),random.randint(0,8); 
                 if (i,j) not in idx: idx.append((i,j));break
         for (i,j) in idx: self.board[i][j]=0 
+        return idx
 

@@ -11,7 +11,7 @@ class Cell:
         self.screen = screen
         self.value = value
         self.cs=cs
-        self.sketched_value = None
+        self.sketched_value = 0 
 
     def set_cell_value(self, value): self.value = value
     def set_sketched_value(self, value): self.sketched_value = value
@@ -19,7 +19,9 @@ class Cell:
         cell_x, cell_y = self.col * self.cs, self.row * self.cs 
         pygame.draw.rect(self.screen, "white", (cell_x, cell_y, Cell.CS, Cell.CS)) #cell background
         pygame.draw.rect(self.screen, "red" if cell_selected else "black", (cell_x, cell_y,Cell.CS, Cell.CS), width=1) #cell border
-        if self.value != 0: self.screen.blit((src:=Cell.font.render(str(self.value), True, (0,0,0))), (cell_x, cell_y, Cell.CS, Cell.CS)) #draw value in cell
+        if self.value != 0: self.screen.blit((src:=Cell.font.render(str(self.value), True, (0,0,0))), \
+            dest:=(cell_x+(Cell.CS-src.get_size()[0])//2, cell_y+(Cell.CS-src.get_size()[1])//2))
+        if self.sketched_value!= 0: self.screen.blit((src:=Cell.font.render(str(self.sketched_value), True, (128,128,128))), dest:=(cell_x+5, cell_y+5))
 
 class Board:
     def __init__(self, width, height, screen, board):
@@ -31,11 +33,10 @@ class Board:
         #check if the cell has been selected and pass in whether it has or not to Cell.draw() to determine border color
         for row in range(0,9): [self.grid[row][col].draw(self.selected_cell == (row, col)) for col in range(0,9)]
 
-
         #draw thick lines
-        for i in range(1, 3): 
-            pygame.draw.line(self.screen, color = "black", start_pos= (0,3*Cell.CS*i), end_pos=(self.width, 3*Cell.CS*i), width = 10)
-            pygame.draw.line(self.screen, color="black", start_pos= (3*Cell.CS*i, 0), end_pos = (3*Cell.CS*i, self.width), width = 10)
+        for i in range(0, 4): 
+            pygame.draw.line(self.screen, color = "black", start_pos= (0,3*Cell.CS*i), end_pos=(self.width, 3*Cell.CS*i), width = 3) # H
+            pygame.draw.line(self.screen, color="black", start_pos= (3*Cell.CS*i, 0), end_pos = (3*Cell.CS*i, self.width), width = 3) # V
 
     def select(self, row, col): self.selected_cell = (row, col) if None not in (row,col) else None
 
@@ -47,8 +48,7 @@ class Board:
     def clear(self):
         pass
 
-    def sketch(self, value):
-        pass
+    def sketch(self, value): self.grid[self.selected_cell[0]][self.selected_cell[1]].set_sketched_value(value)
 
 
 # def main():

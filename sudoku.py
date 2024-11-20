@@ -7,7 +7,7 @@ from BoardandCell import Cell, Board
 # mapping actions to buttons, as property:
 # https://programmingpixels.com/handling-a-title-screen-game-flow-and-buttons-in-pygame.html
 
-WIDTH, HEIGHT = (500,500)
+WIDTH, HEIGHT = (500,600)
 WHITE=(255, 255, 255)
 BLUE=(0, 0, 255)
 BLACK=(0, 0, 0)
@@ -20,18 +20,21 @@ class STATE:
 def _font(fs): return pygame.font.Font(None, fs)
 
 class Button(Sprite):
-    def __init__(self, caption, font, x_pos, y_pos,action, val=None, width=100, height=50):
+    def __init__(self, caption, font, x_pos, y_pos,action, val=None, width=100, height=50, func=None):
         self.caption, self.font=caption,font
         self.width, self.height=(100, 50)
         self.x_pos, self.y_pos=x_pos, y_pos
         self.rect = pygame.Rect(x_pos, y_pos, width, height)
         self.action=action
         self.val=val
+        self.func=func
         self.hover=False #do something with hover ?
 
     def update(self, mousepos, _up):
         self.hover=True if (col:=self.rect.collidepoint(mousepos)) else False
-        if col and _up: return (self.action,self.val) if self.val is not None else self.action
+        if col and _up: 
+            if self.func: self.func()
+            return (self.action,self.val) if self.val is not None else self.action
 
             
     def draw(self, surface):
@@ -50,6 +53,7 @@ def title(screen):
         ]
 
     #EVENT HANDLING 
+    clock=pygame.time.Clock()
     while running:
         screen.fill("white")
         screen.blit(font.render("Sudoku!", False,BLACK), (.40*WIDTH, .25*HEIGHT))
@@ -57,7 +61,7 @@ def title(screen):
         mouse_up=False
         for event in pygame.event.get(): 
             if event.type == pygame.QUIT: 
-                running = False; break
+                running = False; return STATE.QUIT,0
             if event.type == pygame.MOUSEBUTTONUP and event.button:
                 mouse_up=True 
 
@@ -68,55 +72,55 @@ def title(screen):
             obj.draw(screen)
 
         #DISPLAY
-        pygame.draw.rect(screen, BLACK, (0, 0, WIDTH,HEIGHT), 1);pygame.display.flip()  
+        pygame.draw.rect(screen, BLACK, (0, 0, WIDTH,HEIGHT), 1);pygame.display.flip();clock.tick(60)
     return STATE.QUIT
 
 def game(screen,dif):
-    board=SudokuGenerator(9, dif);board.fill_values();board.remove_cells()
-    # get list of values for board and intialize game board with cells, gridlines
-    game_board=Board(WIDTH, HEIGHT, screen, board.get_board())
+    board=SudokuGenerator(9, dif); board.fill_values(); gen_cells=board.remove_cells()
+    game_board=Board(WIDTH, HEIGHT, screen, board.get_board()) # get list of values for board and intialize game board with cells, gridlines
 
     font,running=_font(32),True
-    #clock=pygame.time.Clock()
+    clock=pygame.time.Clock()
+
 
     objects= [
-        Button("Reset",font, .1*WIDTH, .55*HEIGHT,action=STATE.GAME), 
-        Button("Restart.",font, .4*WIDTH, .55*HEIGHT,action=STATE.GAME),
-        Button("Exit",font, .7*WIDTH, .55*HEIGHT,action=STATE.QUIT)
+        Button("Reset",font, .1*WIDTH, .85*HEIGHT,action=STATE.GAME,func=(lambda:[cell.set_sketched_value(0) for row in game_board.grid for cell in row])),
+        Button("Restart",font, .4*WIDTH, .85*HEIGHT,action=STATE.TITLE),
+        Button("Exit",font, .7*WIDTH, .85*HEIGHT,action=STATE.QUIT)
         ]
 
 
-    #EVENT HANDLING 
     while running:
         screen.fill("white")
         mouse_up=False
+
         for event in pygame.event.get(): 
             if event.type == pygame.QUIT: running = False; break
             if event.type == pygame.MOUSEBUTTONUP and event.button: mouse_up=True
-            if event.type == pygame.MOUSEBUTTONDOWN: game_board.select(*(cell_clicked if (cell_clicked:=game_board.click(event.pos[0], event.pos[1])) is not None else (None,None)))
-            # get x, y coordinates of the click and pass them in to Board.click() to get the corresponding row, col ^
+            if event.type == pygame.MOUSEBUTTONDOWN: 
+                game_board.select(*(cell_clicked if (cell_clicked:=game_board.click(event.pos[0], event.pos[1])) in gen_cells else (None,None)))
+            if event.type==pygame.KEYDOWN and event.key in [pygame.key.key_code(str(i)) for i in range(1,10)] and game_board.selected_cell is not None:
+                game_board.sketch(pygame.key.name(event.key))
 
         #LOGIC UPDATES
         for obj in objects: 
-            _state=obj.update(pygame.mouse.get_pos(), mouse_up)
-            if _state is not None and _state!=STATE.GAME: return _state #i.e., QUIT
+            if (state:=obj.update(pygame.mouse.get_pos(), mouse_up)) in (STATE.QUIT, STATE.TITLE):return state 
             obj.draw(screen)
         pygame.draw.rect(screen, BLACK, (0, 0, WIDTH,HEIGHT), 1) #window border
 
         # draw game board after user selects difficulty
-        game_board.draw();pygame.display.flip()  
-
+        game_board.draw();pygame.display.flip();clock.tick(60)
     return STATE.QUIT
 
 def main():
     pygame.init()
-    screen,clock,running=pygame.display.set_mode((WIDTH,HEIGHT)),pygame.time.Clock(),True;pygame.display.set_caption("Sudoku!")
+    screen,running=pygame.display.set_mode((WIDTH,HEIGHT)),True;pygame.display.set_caption("Sudoku!")
     state=STATE.TITLE
 
     while True:
         if state==STATE.QUIT: pygame.quit();return
-        if state==STATE.TITLE: state,dif=title(screen)
-        if state==STATE.GAME: clock.tick(60);state=game(screen,dif)
+        if state==STATE.TITLE: state,dif=title(screen) 
+        if state==STATE.GAME: state=game(screen,dif)
 
 
 main()
