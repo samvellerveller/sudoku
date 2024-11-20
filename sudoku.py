@@ -2,7 +2,6 @@
 from sudoku_generator import SudokuGenerator
 import pygame
 from pygame.sprite import Sprite
-
 from BoardandCell import Cell, Board
 
 # mapping actions to buttons, as property:
@@ -13,13 +12,12 @@ WHITE=(255, 255, 255)
 BLUE=(0, 0, 255)
 BLACK=(0, 0, 0)
 
-class STATE:
+class STATE: 
     QUIT=-1
     TITLE=0
     GAME=1
 
-def _font(fs):
-    return pygame.font.Font(None, fs)
+def _font(fs): return pygame.font.Font(None, fs)
 
 class Button(Sprite):
     def __init__(self, caption, font, x_pos, y_pos,action, val=None, width=100, height=50):
@@ -29,7 +27,7 @@ class Button(Sprite):
         self.rect = pygame.Rect(x_pos, y_pos, width, height)
         self.action=action
         self.val=val
-        self.hover=False
+        self.hover=False #do something with hover ?
 
     def update(self, mousepos, _up):
         self.hover=True if (col:=self.rect.collidepoint(mousepos)) else False
@@ -66,27 +64,21 @@ def title(screen):
         #LOGIC UPDATES
         for obj in objects: 
             _state=obj.update(pygame.mouse.get_pos(), mouse_up)
-            if _state!=None and _state[0]!=STATE.TITLE: return _state
+            if _state!=None and _state[0]!=STATE.TITLE: return _state #i.e., GAME
             obj.draw(screen)
-        pygame.draw.rect(screen, BLACK, (0, 0, WIDTH,HEIGHT), 1)
 
         #DISPLAY
-        pygame.display.flip()  
+        pygame.draw.rect(screen, BLACK, (0, 0, WIDTH,HEIGHT), 1);pygame.display.flip()  
     return STATE.QUIT
 
 def game(screen,dif):
-    board=SudokuGenerator(9, dif)
-    board.fill_values()
-    board.remove_cells()
-
-    cell_size = WIDTH / 9
+    board=SudokuGenerator(9, dif);board.fill_values();board.remove_cells()
     # get list of values for board and intialize game board with cells, gridlines
-    starting_board = board.get_board()
-    game_board = Board(WIDTH, HEIGHT, screen, starting_board)
+    game_board=Board(WIDTH, HEIGHT, screen, board.get_board())
 
-    font=_font(32)
-    running=True
-    clock=pygame.time.Clock()
+    font,running=_font(32),True
+    #clock=pygame.time.Clock()
+
     objects= [
         Button("Reset",font, .1*WIDTH, .55*HEIGHT,action=STATE.GAME), 
         Button("Restart.",font, .4*WIDTH, .55*HEIGHT,action=STATE.GAME),
@@ -99,36 +91,21 @@ def game(screen,dif):
         screen.fill("white")
         mouse_up=False
         for event in pygame.event.get(): 
-            if event.type == pygame.QUIT: 
-                running = False; break
-            if event.type == pygame.MOUSEBUTTONUP and event.button:
-                mouse_up=True
-
-            #click cell
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                # get x, y coordinates of the click and pass them in to Board.click() to get the corresponding row, col
-                click_x, click_y = event.pos
-
-                cell_clicked = game_board.click(click_x, click_y)
-                print(cell_clicked)
-
-                if cell_clicked is not None:
-                    # use cell_clicked to select the cell at row, col
-                    row, col = cell_clicked
-                    game_board.select(row, col)
+            if event.type == pygame.QUIT: running = False; break
+            if event.type == pygame.MOUSEBUTTONUP and event.button: mouse_up=True
+            if event.type == pygame.MOUSEBUTTONDOWN: game_board.select(*(cell_clicked if (cell_clicked:=game_board.click(event.pos[0], event.pos[1])) is not None else (None,None)))
+            # get x, y coordinates of the click and pass them in to Board.click() to get the corresponding row, col ^
 
         #LOGIC UPDATES
         for obj in objects: 
             _state=obj.update(pygame.mouse.get_pos(), mouse_up)
-            if _state is not None and _state!=STATE.GAME: return _state
+            if _state is not None and _state!=STATE.GAME: return _state #i.e., QUIT
             obj.draw(screen)
-        pygame.draw.rect(screen, BLACK, (0, 0, WIDTH,HEIGHT), 1)
+        pygame.draw.rect(screen, BLACK, (0, 0, WIDTH,HEIGHT), 1) #window border
 
         # draw game board after user selects difficulty
-        game_board.draw()
+        game_board.draw();pygame.display.flip()  
 
-
-        pygame.display.flip()  
     return STATE.QUIT
 
 def main():
@@ -139,11 +116,7 @@ def main():
     while True:
         if state==STATE.QUIT: pygame.quit();return
         if state==STATE.TITLE: state,dif=title(screen)
-        if state==STATE.GAME: 
-            clock.tick(60)
-            state=game(screen,dif)
-    print(state,dif)
-
+        if state==STATE.GAME: clock.tick(60);state=game(screen,dif)
 
 
 main()

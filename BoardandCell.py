@@ -1,89 +1,47 @@
 import pygame
 
-cell_size = 500 / 9
-
 class Cell:
-    def __init__(self, row, col, screen, value = 0):
+    CS=500/9
+    pygame.init()
+    font=pygame.font.Font(None, 30)  
+
+    def __init__(self, row, col, screen, value = 0,cs=500/9):
         self.row = row
         self.col = col
         self.screen = screen
         self.value = value
-
+        self.cs=cs
         self.sketched_value = None
 
-    def set_cell_value(self, value):
-        self.value = value
-
-
-    def set_sketched_value(self, value):
-        self.sketched_value = value
-
+    def set_cell_value(self, value): self.value = value
+    def set_sketched_value(self, value): self.sketched_value = value
     def draw(self, cell_selected = False):
-
-
-        cell_x = self.col * cell_size
-        cell_y = self.row * cell_size
-
-        unselected_border = "black"
-        selected_border = "red"
-
-        #border will be red if cell (row, col) matches that of the selected cell
-        border_color = selected_border if cell_selected else unselected_border
-
-        #cell background
-        pygame.draw.rect(self.screen, "white", (cell_x, cell_y, cell_size, cell_size))
-
-        #cell border
-        pygame.draw.rect(self.screen, border_color, (cell_x, cell_y, cell_size, cell_size), width=1)
-
-        #draw value in cell
-        if self.value != 0:
-            pass
-
-
-
-
-
+        cell_x, cell_y = self.col * self.cs, self.row * self.cs 
+        pygame.draw.rect(self.screen, "white", (cell_x, cell_y, Cell.CS, Cell.CS)) #cell background
+        pygame.draw.rect(self.screen, "red" if cell_selected else "black", (cell_x, cell_y,Cell.CS, Cell.CS), width=1) #cell border
+        if self.value != 0: self.screen.blit((src:=Cell.font.render(str(self.value), True, (0,0,0))), (cell_x, cell_y, Cell.CS, Cell.CS)) #draw value in cell
 
 class Board:
-    def __init__(self, width, height, screen, difficulty):
-        self.width = width
-        self.height = height
-        self.screen = screen
-        self.difficulty = difficulty
-
-        #draw 9x9 grid with each square being Cell object
-        self.grid = [[Cell(row, col, screen) for col in range(9)] for row in range(9)]
+    def __init__(self, width, height, screen, board):
+        self.width,self.height,self.screen,self.board=width,height,screen,board
+        self.grid=[[Cell(row,col,self.screen,val) for (col,val) in enumerate(board[row])] for row in range(len(board))]
         self.selected_cell = None
 
     def draw(self):
-        # draw cells
-        for row in range(9):
-            for col in range(9):
-                #check if the cell has been selected and pass in whether it has or not to Cell.draw() to determine border color
-                cell_selected = self.selected_cell == (row, col)
-                self.grid[row][col].draw(cell_selected)
+        #check if the cell has been selected and pass in whether it has or not to Cell.draw() to determine border color
+        for row in range(0,9): [self.grid[row][col].draw(self.selected_cell == (row, col)) for col in range(0,9)]
 
 
-        #draw thick horizontal lines
-        for i in range(1, 3):
-            pygame.draw.line(self.screen, color = "black", start_pos= (0, i * self.width/3), end_pos=(self.width, i * self.width/3), width = 10)
+        #draw thick lines
+        for i in range(1, 3): 
+            pygame.draw.line(self.screen, color = "black", start_pos= (0,3*Cell.CS*i), end_pos=(self.width, 3*Cell.CS*i), width = 10)
+            pygame.draw.line(self.screen, color="black", start_pos= (3*Cell.CS*i, 0), end_pos = (3*Cell.CS*i, self.width), width = 10)
 
-        #draw thick vertical lines
-        for i in range(1, 3):
-            pygame.draw.line(self.screen, color="black", start_pos= (i * self.width/3 , 0), end_pos = (i * self.width/3 , self.width), width = 10)
+    def select(self, row, col): self.selected_cell = (row, col) if None not in (row,col) else None
 
-    def select(self, row, col):
-        self.selected_cell = (row, col)
-
-    def click(self, x, y):
+    def click(self, x, y): return (int(y // Cell.CS),int(x // Cell.CS)) if 0 < x < self.width and 0 < y < self.width else None
         #if the x, y position of the click is inside the board, the row is the y coordinate // cell size, column is x-coordinate // cell size
         #if the click is outside the board return None
-        if 0 < x < self.width and 0 < y < self.width:
-            row = int(y // cell_size)
-            col = int(x // cell_size)
-            return (row, col)
-        return None
 
 
     def clear(self):
@@ -91,10 +49,6 @@ class Board:
 
     def sketch(self, value):
         pass
-
-
-
-
 
 
 # def main():
@@ -135,3 +89,8 @@ class Board:
 #
 # if __name__ == "__main__":
 #     main()
+
+
+
+
+
