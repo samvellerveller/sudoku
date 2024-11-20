@@ -45,12 +45,19 @@ class Board:
         #if the click is outside the board return None
 
 
-    def clear(self):
-        pass
-
+    def clear(self): [cell.set_sketched_value(0) for row in self.grid for cell in row]
     def sketch(self, value): self.grid[self.selected_cell[0]][self.selected_cell[1]].set_sketched_value(value)
-
-
+    def place(self): 
+        self.grid[self.selected_cell[0]][self.selected_cell[1]].value=self.grid[self.selected_cell[0]][self.selected_cell[1]].sketched_value
+        self.grid[self.selected_cell[0]][self.selected_cell[1]].set_sketched_value(0)
+    def is_full(self): return all([cell.value!=0 for row in self.grid for cell in row])
+    def check_board(self):
+        b_rows=([[_+(3*(i//3)) for _ in range(3)] for i in range(9)])
+        b_cols=([([(3*(i//3),3+3*(i//3)) for i in range(9)]*3)[g:g+3] for g in range(0,27,3)])
+        b_values=[[[j for j in (self[r][cs:ce])] for r,(cs,ce) in zip(R,C)] for R,C in zip(b_rows, b_cols)]
+        return is_full and all([set(r)==set([_ for _ in range(1,10)]) for r in self.grid]) and \
+        all([[set([self.grid[r][c] for r in [_ for _ in range(9)]])==set([_ for _ in range(1,10)])] for c in range(len(self.grid))]) and \
+            all([set([num for row in rows3 for num in row])==set(range(1,10)) for rows3 in b_values])
 # def main():
 #     pygame.init()
 #

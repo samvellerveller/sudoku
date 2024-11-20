@@ -84,7 +84,7 @@ def game(screen,dif):
 
 
     objects= [
-        Button("Reset",font, .1*WIDTH, .85*HEIGHT,action=STATE.GAME,func=(lambda:[cell.set_sketched_value(0) for row in game_board.grid for cell in row])),
+        Button("Reset",font, .1*WIDTH, .85*HEIGHT,action=STATE.GAME,func=game_board.clear),
         Button("Restart",font, .4*WIDTH, .85*HEIGHT,action=STATE.TITLE),
         Button("Exit",font, .7*WIDTH, .85*HEIGHT,action=STATE.QUIT)
         ]
@@ -101,6 +101,8 @@ def game(screen,dif):
                 game_board.select(*(cell_clicked if (cell_clicked:=game_board.click(event.pos[0], event.pos[1])) in gen_cells else (None,None)))
             if event.type==pygame.KEYDOWN and event.key in [pygame.key.key_code(str(i)) for i in range(1,10)] and game_board.selected_cell is not None:
                 game_board.sketch(pygame.key.name(event.key))
+            elif event.type==pygame.KEYDOWN and event.key == pygame.K_RETURN and game_board.selected_cell is not None:
+                game_board.place()
 
         #LOGIC UPDATES
         for obj in objects: 
