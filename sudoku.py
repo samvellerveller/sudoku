@@ -103,6 +103,8 @@ def game(screen,dif):
                 game_board.sketch(pygame.key.name(event.key))
             elif event.type==pygame.KEYDOWN and event.key == pygame.K_RETURN and game_board.selected_cell is not None:
                 game_board.place()
+                print(game_board.check_board())
+
 
         #LOGIC UPDATES
         for obj in objects: 
