@@ -45,7 +45,8 @@ class Board:
         #if the click is outside the board return None
 
 
-    def clear(self): [cell.set_sketched_value(0) for row in self.grid for cell in row]
+    def clear(self):
+        self.selected_cell.set_sketched_value(0)
     def sketch(self, value): self.grid[self.selected_cell[0]][self.selected_cell[1]].set_sketched_value(value)
     def place(self): 
         self.grid[self.selected_cell[0]][self.selected_cell[1]].value=self.grid[self.selected_cell[0]][self.selected_cell[1]].sketched_value
@@ -58,6 +59,16 @@ class Board:
         return self.is_full() and all([set(r)==set([_ for _ in range(1,10)]) for r in self.grid]) and \
         all([[set([self.grid[r][c] for r in [_ for _ in range(9)]])==set([_ for _ in range(1,10)])] for c in range(len(self.grid))]) and \
             all([set([num for row in rows3 for num in row])==set(range(1,10)) for rows3 in b_values]) #checks rows,cols,boxes
+    def reset_to_original(self): [cell.set_sketched_value(0) for row in self.grid for cell in row]
+    def update_board(self):
+        for i in len(self.board):
+            for j in len(i):
+                self.board[i][j] = self.grid[i][j].value
+    def find_empty(self):
+        for row in self.grid:
+            for cell in row:
+                if cell.value == 0:
+                    return cell
 # def main():
 #     pygame.init()
 #
