@@ -1,5 +1,6 @@
 import pygame
 
+
 class Cell:
     CS=500/9
     pygame.init()
@@ -26,9 +27,14 @@ class Cell:
 class Board:
     def __init__(self, width, height, screen, board):
         self.width,self.height,self.screen,self.board=width,height,screen,board
-        self.original_board = [[val for val in row] for row in board]
         self.grid=[[Cell(row,col,self.screen,val) for (col,val) in enumerate(board[row])] for row in range(len(board))]
         self.selected_cell = None
+        self.initial_cell = []
+        for i, row in enumerate(board):
+            for j, value in enumerate(row):
+                   if value != 0:
+                       self.initial_cell.append((i, j))
+
 
     def draw(self):
         #check if the cell has been selected and pass in whether it has or not to Cell.draw() to determine border color
@@ -39,7 +45,8 @@ class Board:
             pygame.draw.line(self.screen, color = "black", start_pos= (0,3*Cell.CS*i), end_pos=(self.width, 3*Cell.CS*i), width = 3) # H
             pygame.draw.line(self.screen, color="black", start_pos= (3*Cell.CS*i, 0), end_pos = (3*Cell.CS*i, self.width), width = 3) # V
 
-    def select(self, row, col): self.selected_cell = (row, col) if None not in (row,col) else None
+    def select(self, row, col):
+        self.selected_cell = (row, col) if None not in (row, col) else None
 
     def click(self, x, y): return (int(y // Cell.CS),int(x // Cell.CS)) if 0 < x < self.width and 0 < y < self.width else None
         #if the x, y position of the click is inside the board, the row is the y coordinate // cell size, column is x-coordinate // cell size
@@ -47,11 +54,28 @@ class Board:
 
 
     def clear(self):
-        self.selected_cell.set_sketched_value(0)
-    def sketch(self, value): self.grid[self.selected_cell[0]][self.selected_cell[1]].set_sketched_value(value)
-    def place(self): 
-        self.grid[self.selected_cell[0]][self.selected_cell[1]].value=self.grid[self.selected_cell[0]][self.selected_cell[1]].sketched_value
-        self.grid[self.selected_cell[0]][self.selected_cell[1]].set_sketched_value(0)
+        if self.selected_cell is not None:
+
+        # if self.selected_cell in self.initial_cell:
+        #     pass
+        # else: # elif self.selected_cell is not self.initial_cell:
+        #     self.selected_cell.set_sketched_value(0)
+        # if self.selected_cell is not None: # elif self.selected_cell is not self.initial_cell:
+            self.selected_cell.set_sketched_value(0)
+    def sketch(self, value):
+           if self.selected_cell in self.initial_cell:
+                pass
+           else:
+                self.grid[self.selected_cell[0]][self.selected_cell[1]].set_sketched_value(value)
+    def place(self):
+        if self.selected_cell in self.initial_cell:
+            pass
+        else:
+            self.grid[self.selected_cell[0]][self.selected_cell[1]].value=self.grid[self.selected_cell[0]][self.selected_cell[1]].sketched_value
+            self.grid[self.selected_cell[0]][self.selected_cell[1]].set_sketched_value(0)
+        # if self.is_full() is True:
+        #     self.check_board()
+
     def is_full(self): return all([cell.value!=0 for row in self.grid for cell in row])
     def check_board(self):
         b_rows=([[_+(3*(i//3)) for _ in range(3)] for i in range(9)]) # box indexes, zip with box cols
@@ -60,21 +84,17 @@ class Board:
         return self.is_full() and all([set(r)==set([_ for _ in range(1,10)]) for r in self.grid]) and \
         all([[set([self.grid[r][c] for r in [_ for _ in range(9)]])==set([_ for _ in range(1,10)])] for c in range(len(self.grid))]) and \
             all([set([num for row in rows3 for num in row])==set(range(1,10)) for rows3 in b_values]) #checks rows,cols,boxes
-    def reset_to_original(self):
-        for row_idx, row in enumerate(self.original_board):
-            for col_idx, val in enumerate(row):
-                self.grid[row_idx][col_idx].set_cell_value(val)
-                self.grid[row_idx][col_idx].set_sketched_value(0)
+    def reset_to_original(self): [cell.set_sketched_value(0) for row in self.grid for cell in row]
     def update_board(self):
         for i in len(self.board):
             for j in len(i):
                 self.board[i][j] = self.grid[i][j].value
-#finds empty cells in the grid
     def find_empty(self):
         for row in self.grid:
             for cell in row:
                 if cell.value == 0:
                     return cell
+
 
 # def main():
 #     pygame.init()
@@ -114,8 +134,3 @@ class Board:
 #
 # if __name__ == "__main__":
 #     main()
-
-
-
-
-
