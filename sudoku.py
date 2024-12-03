@@ -1,3 +1,5 @@
+from os.path import isabs
+
 #!/venv/bin/python3
 from sudoku_generator import SudokuGenerator
 import pygame
@@ -139,31 +141,62 @@ def game(screen, dif):
                 game_board.sketch(pygame.key.name(event.key))
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN and game_board.selected_cell is not None:
                 game_board.place()
-                if game_board.is_full() is True and game_board.check_board() is False:
-                    state = STATE.LOST
-                    if state == STATE.LOST:
-                        #render buttons
-                        pygame.font.Font(None, 50)
-                        screen.blit(font.render("Game Lost!", False, 'WHITE', 'RED'), (.40 * WIDTH, .25 * HEIGHT))
-                        pygame.display.flip()
-                        pygame.time.wait(5000)
-                        font, running = _font(32), True
-                        clock = pygame.time.Clock()
-                        objects = [
-                            Button("Restart", font, .4 * WIDTH, .85 * HEIGHT, action=STATE.TITLE)
-                        ]
-                elif game_board.is_full() is True and game_board.check_board() is True:
-                    state = STATE.WON
-                    if state == STATE.WON:
-                        pygame.font.Font(None, 50)
-                        screen.blit(font.render("Game Won!", True, 'WHITE', 'GREEN'), (.40 * WIDTH, .25 * HEIGHT))
-                        pygame.display.flip()
-                        pygame.time.wait(5000)
-                        font, running = _font(32), True
-                        clock = pygame.time.Clock()
-                        objects = [
-                            Button("Exit", font, .4 * WIDTH, .85 * HEIGHT, action=STATE.QUIT)
-                        ]
+                if game_board.is_full() is True:
+                    if game_board.check_board() is False:
+                        state = STATE.LOST
+                        if state == STATE.LOST:
+                            font = _font(32)
+                            objects = Button("Restart", font, .4 * WIDTH, .85 * HEIGHT, action=STATE.TITLE)
+                            running = True
+                            while running:
+                                screen.fill('white')
+                                screen.blit(font.render("Game Lost!", False, 'WHITE', 'RED'), (.40 * WIDTH, .25 * HEIGHT))
+                                mouse_up = False
+                                for event in pygame.event.get():
+                                    if event.type == pygame.QUIT: running = False; break
+                                    if event.type == pygame.MOUSEBUTTONUP and event.button: mouse_up = True
+                                # if (state := objects.update(pygame.mouse.get_pos(), mouse_up)) in (
+                                # STATE.QUIT, STATE.TITLE): return state
+                                objects.draw(screen)
+                                objects.update(pygame.mouse.get_pos(), mouse_up)
+                                if mouse_up is True:
+                                    return STATE.TITLE
+                                pygame.display.flip()
+                                clock.tick(60)
+                            return STATE.QUIT
+
+                        # #render buttons
+                        # pygame.font.Font(None, 50)
+                        #
+                        # pygame.display.flip()
+                        # pygame.time.wait(5000)
+                        # font, running = _font(32), True
+                        # clock = pygame.time.Clock()
+                        # objects = [
+                        #     Button("Restart", font, .4 * WIDTH, .85 * HEIGHT, action=STATE.TITLE)
+                        #
+                    elif  game_board.check_board() is True:
+                        state = STATE.WON
+                        if state == STATE.WON:
+                            font = _font(32)
+                            objects = Button("Exit", font, .4 * WIDTH, .85 * HEIGHT, action=STATE.TITLE)
+                            running = True
+                            while running:
+                                screen.fill('white')
+                                screen.blit(font.render("Game Won!", True, 'WHITE', 'GREEN'), (.40 * WIDTH, .25 * HEIGHT))
+                                mouse_up == False
+                                for event in pygame.event.get():
+                                    if event.type == pygame.QUIT: running = False; break
+                                    if event.type == pygame.MOUSEBUTTONUP and event.button: mouse_up = True
+                                # if (state := objects.update(pygame.mouse.get_pos(), mouse_up)) in (
+                                # STATE.QUIT, STATE.TITLE): return state
+                                objects.draw(screen)
+                                objects.update(pygame.mouse.get_pos(), mouse_up)
+                                if mouse_up is True:
+                                    return STATE.QUIT
+                                pygame.display.flip()
+                                clock.tick(60)
+                            return STATE.QUIT
 
     # LOGIC UPDATES
         for obj in objects:
