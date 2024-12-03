@@ -84,7 +84,7 @@ def game(screen,dif):
 
 
     objects= [
-        Button("Reset",font, .1*WIDTH, .85*HEIGHT,action=STATE.GAME,func=game_board.clear),
+        Button("Reset",font, .1*WIDTH, .85*HEIGHT,action=STATE.GAME,func=game_board.reset_to_original),
         Button("Restart",font, .4*WIDTH, .85*HEIGHT,action=STATE.TITLE),
         Button("Exit",font, .7*WIDTH, .85*HEIGHT,action=STATE.QUIT)
         ]
@@ -143,7 +143,8 @@ def main():
     while True:
         if state==STATE.QUIT: pygame.quit();return
         if state==STATE.TITLE: state,dif=title(screen) 
-        if state==STATE.GAME: state=game(screen,dif)
+        if state==STATE.GAME:
+            state=game(screen,dif)
 
 
 main()
