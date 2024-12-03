@@ -28,6 +28,7 @@ class Board:
     def __init__(self, width, height, screen, board):
         self.width,self.height,self.screen,self.board=width,height,screen,board
         self.grid=[[Cell(row,col,self.screen,val) for (col,val) in enumerate(board[row])] for row in range(len(board))]
+        self.original_board = [[val for val in row] for row in board]
         self.selected_cell = None
         self.initial_cell = []
         for i, row in enumerate(board):
@@ -84,7 +85,11 @@ class Board:
         return self.is_full() and all([set(r)==set([_ for _ in range(1,10)]) for r in self.grid]) and \
         all([[set([self.grid[r][c] for r in [_ for _ in range(9)]])==set([_ for _ in range(1,10)])] for c in range(len(self.grid))]) and \
             all([set([num for row in rows3 for num in row])==set(range(1,10)) for rows3 in b_values]) #checks rows,cols,boxes
-    def reset_to_original(self): [cell.set_sketched_value(0) for row in self.grid for cell in row]
+    def reset_to_original(self):
+        for row_idx, row in enumerate(self.original_board):
+            for col_idx, val in enumerate(row):
+                self.grid[row_idx][col_idx].set_cell_value(val)
+                self.grid[row_idx][col_idx].set_sketched_value(0)
     def update_board(self):
         for i in len(self.board):
             for j in len(i):
