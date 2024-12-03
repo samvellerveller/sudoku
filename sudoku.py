@@ -96,7 +96,7 @@ def game(screen, dif):
     clock = pygame.time.Clock()
 
     objects = [
-        Button("Reset", font, .1 * WIDTH, .85 * HEIGHT, action=STATE.GAME, func=game_board.clear),
+        Button("Reset", font, .1 * WIDTH, .85 * HEIGHT, action=STATE.GAME, func=game_board.reset_to_original),
         Button("Restart", font, .4 * WIDTH, .85 * HEIGHT, action=STATE.TITLE),
         Button("Exit", font, .7 * WIDTH, .85 * HEIGHT, action=STATE.QUIT)
     ]
