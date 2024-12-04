@@ -79,12 +79,31 @@ class Board:
 
     def is_full(self): return all([cell.value!=0 for row in self.grid for cell in row])
     def check_board(self):
-        b_rows=([[_+(3*(i//3)) for _ in range(3)] for i in range(9)]) # box indexes, zip with box cols
-        b_cols=([([(3*(i//3),3+3*(i//3)) for i in range(9)]*3)[g:g+3] for g in range(0,27,3)])
-        b_values=[[[j for j in (self.grid[r][cs:ce])] for r,(cs,ce) in zip(R,C)] for R,C in zip(b_rows, b_cols)]
-        return self.is_full() and all([set(r)==set([_ for _ in range(1,10)]) for r in self.grid]) and \
-        all([[set([self.grid[r][c] for r in [_ for _ in range(9)]])==set([_ for _ in range(1,10)])] for c in range(len(self.grid))]) and \
-            all([set([num for row in rows3 for num in row])==set(range(1,10)) for rows3 in b_values]) #checks rows,cols,boxes
+        #row indexes, zip with col indexes
+        #find whether to start at 1st/2nd/3rd group of rows (top boxes are in 1st group) then add row number to get row 0-8
+        b_rows = [[3*(i//3) + row for row in range(3)] for i in range(9)]
+        #col indexes
+        #iterate over each box and find its column indexes (0,1,2 for top left, 3,4,5 for center top, etc)
+        b_cols = [[3* (i//3) + j for j in range(3)] for i in range(9)]
+
+        #values in each box starting from top left box
+        b_values = [[int(self.grid[r][c].value) for r in row for c in col] for row, col in zip(b_rows, b_cols)]
+
+        #check each row to make sure there are numbers 1-9 with no duplicates
+        row_check = all(set(int(cell.value) for cell in row) == set(range(1,10)) for row in self.grid)
+        #check columns for numbers 1-9, no duplicates
+        col_check = all(set(int(self.grid[r][c].value) for r in range(9)) == set(range(1, 10)) for c in range(9))
+        #check each box for numbers 1-9, no duplicates
+        box_check = all(set(box) == set(range(1,10)) for box in b_values)
+        return self.is_full() and row_check and col_check and box_check
+
+
+        # b_rows=([[_+(3*(i//3)) for _ in range(3)] for i in range(9)]) # box indexes, zip with box cols
+        # b_cols=([([(3*(i//3),3+3*(i//3)) for i in range(9)]*3)[g:g+3] for g in range(0,27,3)])
+        # b_values=[[[j for j in (self.grid[r][cs:ce])] for r,(cs,ce) in zip(R,C)] for R,C in zip(b_rows, b_cols)]
+        # return self.is_full() and all([set(r)==set([_ for _ in range(1,10)]) for r in self.grid]) and \
+        # all([[set([self.grid[r][c] for r in [_ for _ in range(9)]])==set([_ for _ in range(1,10)])] for c in range(len(self.grid))]) and \
+        #     all([set([num for row in rows3 for num in row])==set(range(1,10)) for rows3 in b_values]) #checks rows,cols,boxes
     def reset_to_original(self): [cell.set_sketched_value(0) for row in self.grid for cell in row]
     def update_board(self):
         for i in len(self.board):
